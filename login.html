@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Autofiller - Login</title>
+    <link rel="stylesheet" type="text/css" href="login.css">
+</head>
+
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="header-icon">💼</div>
+                <h1>Job Autofiller</h1>
+                <p class="header-subtitle">Welcome back! Please sign in to continue</p>
+            </div>
+
+            <!-- Login Form -->
+            <div id="loginForm" class="auth-form active">
+                <h2>Sign In</h2>
+                <form id="loginFormElement">
+                    <div class="form-group">
+                        <label for="loginEmail">Email or Username</label>
+                        <input type="text" id="loginEmail" name="email" placeholder="Enter your email or username"
+                            required autocomplete="username">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" name="password" placeholder="Enter your password"
+                            required autocomplete="current-password">
+                    </div>
+
+                    <div class="form-options">
+                        <label class="remember-me">
+                            <input type="checkbox" id="rememberMe" name="rememberMe">
+                            <span>Remember me</span>
+                        </label>
+                        <a href="#" class="forgot-password">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="auth-button primary">
+                        <span>Sign In</span>
+                        <span class="button-icon">→</span>
+                    </button>
+                </form>
+
+                <div class="auth-divider">
+                    <span>OR</span>
+                </div>
+
+                <button class="auth-button google-button" id="googleLogin">
+                    <svg class="google-icon" viewBox="0 0 24 24">
+                        <path fill="#4285F4"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                        <path fill="#34A853"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                        <path fill="#FBBC05"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                        <path fill="#EA4335"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                    </svg>
+                    <span>Continue with Google</span>
+                </button>
+
+                <div class="auth-switch">
+                    <p>Don't have an account? <a href="#" id="switchToSignup">Sign up</a></p>
+                </div>
+            </div>
+
+            <!-- Signup Form -->
+            <div id="signupForm" class="auth-form">
+                <h2>Create Account</h2>
+                <form id="signupFormElement">
+                    <div class="form-group">
+                        <label for="signupName">Full Name</label>
+                        <input type="text" id="signupName" name="name" placeholder="Enter your full name" required
+                            autocomplete="name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signupEmail">Email</label>
+                        <input type="email" id="signupEmail" name="email" placeholder="Enter your email" required
+                            autocomplete="email">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signupUsername">Username</label>
+                        <input type="text" id="signupUsername" name="username" placeholder="Choose a username" required
+                            autocomplete="username">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signupPassword">Password</label>
+                        <input type="password" id="signupPassword" name="password" placeholder="Create a password"
+                            required autocomplete="new-password">
+                        <small class="password-hint">Must be at least 6 characters</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword"
+                            placeholder="Confirm your password" required autocomplete="new-password">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="terms-checkbox">
+                            <input type="checkbox" id="agreeTerms" name="agreeTerms" required>
+                            <span>I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy
+                                    Policy</a></span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="auth-button primary">
+                        <span>Create Account</span>
+                        <span class="button-icon">✓</span>
+                    </button>
+                </form>
+
+                <div class="auth-divider">
+                    <span>OR</span>
+                </div>
+
+                <button class="auth-button google-button" id="googleSignup">
+                    <svg class="google-icon" viewBox="0 0 24 24">
+                        <path fill="#4285F4"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                        <path fill="#34A853"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                        <path fill="#FBBC05"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                        <path fill="#EA4335"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                    </svg>
+                    <span>Sign up with Google</span>
+                </button>
+
+                <div class="auth-switch">
+                    <p>Already have an account? <a href="#" id="switchToLogin">Sign in</a></p>
+                </div>
+            </div>
+
+            <!-- Error/Success Messages -->
+            <div id="authMessage" class="auth-message hidden"></div>
+        </div>
+
+        <!-- Demo Credentials Info -->
+        <div class="demo-info">
+            <p class="demo-title">🔓 Demo Mode</p>
+            <p class="demo-text">For testing: Use any username and password</p>
+            <p class="demo-text-small">Real authentication will be implemented later</p>
+        </div>
+    </div>
+
+    <script src="login.js"></script>
+</body>
+
+</html>
