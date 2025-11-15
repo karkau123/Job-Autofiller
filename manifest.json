@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Job Autofiller",
+  "version": "1.0",
+  "description": "Automatically fill job application forms with your saved information",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "tabs"
+  ]
+}
