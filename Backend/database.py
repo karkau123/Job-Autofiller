@@ -12,6 +12,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    UniqueConstraint,
     create_engine,
 )
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
@@ -44,6 +45,9 @@ Base = declarative_base()
 class Profile(Base):
     __tablename__ = "profiles"
     __allow_unmapped__ = True
+    __table_args__ = (
+        UniqueConstraint('email', name='uq_profile_email'),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -52,7 +56,7 @@ class Profile(Base):
     # Personal info
     first_name = Column(String(100))
     last_name = Column(String(100))
-    email = Column(String(255), index=True)
+    email = Column(String(255), index=True, unique=True, nullable=True)
     phone = Column(String(50))
     address = Column(Text)
     city = Column(String(100))

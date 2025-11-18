@@ -116,7 +116,7 @@ def read_root():
 
 @app.post("/api/save-profile")
 async def save_profile(profile: ProfileData, db: Session = Depends(get_db)):
-    """Persist the submitted profile in PostgreSQL."""
+    """Persist the submitted profile in PostgreSQL. Updates existing profile if email matches."""
     try:
         profile_dict = profile.model_dump()
 
@@ -126,37 +126,85 @@ async def save_profile(profile: ProfileData, db: Session = Depends(get_db)):
         print(json.dumps(profile_dict, indent=2, ensure_ascii=False))
         print("=" * 80 + "\n")
 
-        profile_record = ProfileModel(
-            first_name=profile.personal.firstName,
-            last_name=profile.personal.lastName,
-            email=profile.personal.email,
-            phone=profile.personal.phone,
-            address=profile.personal.address,
-            city=profile.personal.city,
-            state=profile.personal.state,
-            zip_code=profile.personal.zipCode,
-            country=profile.personal.country,
-            linkedin=profile.personal.linkedin,
-            portfolio=profile.personal.portfolio,
-            current_title=profile.professional.currentTitle,
-            current_company=profile.professional.currentCompany,
-            summary=profile.professional.summary,
-            skills=profile.professional.skills or [],
-            degree=profile.education.degree,
-            field_of_study=profile.education.fieldOfStudy,
-            university=profile.education.university,
-            graduation_year=profile.education.graduationYear,
-            gpa=profile.education.gpa,
-            resume_url=profile.documents.resumeUrl,
-            resume_file_name=profile.documents.resumeFileName,
-            cover_letter=profile.documents.coverLetter,
-            availability=profile.additional.availability,
-            salary_expectation=profile.additional.salaryExpectation,
-            work_authorization=profile.additional.workAuthorization,
-            languages=profile.additional.languages or [],
-            last_updated=parse_iso_datetime(profile.lastUpdated),
-        )
+        # Check if profile with this email already exists
+        existing_profile = None
+        if profile.personal.email:
+            existing_profile = db.query(ProfileModel).filter(
+                ProfileModel.email == profile.personal.email
+            ).first()
 
+        if existing_profile:
+            # Update existing profile
+            profile_record = existing_profile
+            profile_record.first_name = profile.personal.firstName
+            profile_record.last_name = profile.personal.lastName
+            profile_record.phone = profile.personal.phone
+            profile_record.address = profile.personal.address
+            profile_record.city = profile.personal.city
+            profile_record.state = profile.personal.state
+            profile_record.zip_code = profile.personal.zipCode
+            profile_record.country = profile.personal.country
+            profile_record.linkedin = profile.personal.linkedin
+            profile_record.portfolio = profile.personal.portfolio
+            profile_record.current_title = profile.professional.currentTitle
+            profile_record.current_company = profile.professional.currentCompany
+            profile_record.summary = profile.professional.summary
+            profile_record.skills = profile.professional.skills or []
+            profile_record.degree = profile.education.degree
+            profile_record.field_of_study = profile.education.fieldOfStudy
+            profile_record.university = profile.education.university
+            profile_record.graduation_year = profile.education.graduationYear
+            profile_record.gpa = profile.education.gpa
+            profile_record.resume_url = profile.documents.resumeUrl
+            profile_record.resume_file_name = profile.documents.resumeFileName
+            profile_record.cover_letter = profile.documents.coverLetter
+            profile_record.availability = profile.additional.availability
+            profile_record.salary_expectation = profile.additional.salaryExpectation
+            profile_record.work_authorization = profile.additional.workAuthorization
+            profile_record.languages = profile.additional.languages or []
+            profile_record.last_updated = parse_iso_datetime(profile.lastUpdated) or datetime.utcnow()
+
+            # Clear existing experiences and references (cascade will handle deletion)
+            profile_record.experiences.clear()
+            profile_record.references.clear()
+            
+            action = "updated"
+        else:
+            # Create new profile
+            profile_record = ProfileModel(
+                first_name=profile.personal.firstName,
+                last_name=profile.personal.lastName,
+                email=profile.personal.email,
+                phone=profile.personal.phone,
+                address=profile.personal.address,
+                city=profile.personal.city,
+                state=profile.personal.state,
+                zip_code=profile.personal.zipCode,
+                country=profile.personal.country,
+                linkedin=profile.personal.linkedin,
+                portfolio=profile.personal.portfolio,
+                current_title=profile.professional.currentTitle,
+                current_company=profile.professional.currentCompany,
+                summary=profile.professional.summary,
+                skills=profile.professional.skills or [],
+                degree=profile.education.degree,
+                field_of_study=profile.education.fieldOfStudy,
+                university=profile.education.university,
+                graduation_year=profile.education.graduationYear,
+                gpa=profile.education.gpa,
+                resume_url=profile.documents.resumeUrl,
+                resume_file_name=profile.documents.resumeFileName,
+                cover_letter=profile.documents.coverLetter,
+                availability=profile.additional.availability,
+                salary_expectation=profile.additional.salaryExpectation,
+                work_authorization=profile.additional.workAuthorization,
+                languages=profile.additional.languages or [],
+                last_updated=parse_iso_datetime(profile.lastUpdated),
+            )
+            db.add(profile_record)
+            action = "created"
+
+        # Add experiences
         for exp in profile.experience:
             profile_record.experiences.append(
                 ExperienceModel(
@@ -169,6 +217,7 @@ async def save_profile(profile: ProfileData, db: Session = Depends(get_db)):
                 )
             )
 
+        # Add references
         for ref in profile.references:
             profile_record.references.append(
                 ReferenceModel(
@@ -180,15 +229,15 @@ async def save_profile(profile: ProfileData, db: Session = Depends(get_db)):
                 )
             )
 
-        db.add(profile_record)
         db.commit()
         db.refresh(profile_record)
 
         return {
             "success": True,
-            "message": "Profile saved successfully",
+            "message": f"Profile {action} successfully",
             "timestamp": datetime.now().isoformat(),
             "profile_id": profile_record.id,
+            "action": action,
             "data_received": {
                 "personal_info": bool(profile.personal.email),
                 "professional_info": bool(profile.professional.currentTitle),
@@ -213,4 +262,7 @@ def health_check():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+#
 
+
+# uvicorn main:app --reload --host 0.0.0.0 --port 8000
