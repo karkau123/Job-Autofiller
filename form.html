@@ -215,10 +215,10 @@
         </div>
 
         <div class="form-group">
-          <label for="resumeText">Resume Text (Paste your resume content here)</label>
-          <textarea id="resumeText" name="resumeText" rows="8"
-            placeholder="Paste your resume content here. This will be used by AI to better match your information to job application forms..."></textarea>
-          <small class="form-hint">AI will use this to intelligently fill forms based on job descriptions</small>
+          <label for="resumeFile">Upload Resume (PDF format)</label>
+          <input type="file" id="resumeFile" name="resumeFile" accept=".pdf" />
+          <small class="form-hint">Upload your resume in PDF format. The file will be stored on our server.</small>
+          <div id="resumeFileName" class="file-name-display" style="margin-top: 8px; color: #28a745; display: none;"></div>
         </div>
 
         <div class="form-group">

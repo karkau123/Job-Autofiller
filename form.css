@@ -176,6 +176,7 @@ body {
 .form-group input[type="url"],
 .form-group input[type="number"],
 .form-group input[type="month"],
+.form-group input[type="file"],
 .form-group select,
 .form-group textarea {
     width: 100%;
@@ -194,12 +195,44 @@ body {
     outline: none;
     border-color: #667eea;
     background: white;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);Resume & Documents
 }
 
 .form-group textarea {
     resize: vertical;
     min-height: 100px;
+}
+
+.file-name-display {
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 12px;
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+.form-group input[type="file"] {
+    cursor: pointer;
+    padding: 10px;
+}
+
+.form-group input[type="file"]::file-selector-button {
+    padding: 8px 16px;
+    margin-right: 12px;
+    border: 2px solid #667eea;
+    border-radius: 8px;
+    background: #667eea;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.form-group input[type="file"]::file-selector-button:hover {
+    background: #5568d3;
+    border-color: #5568d3;
 }
 
 .form-hint {

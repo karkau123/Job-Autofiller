@@ -109,6 +109,22 @@ function setupEventListeners() {
             }
         }
     });
+
+    // Handle resume file change
+    document.getElementById('resumeFile').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.type !== 'application/pdf') {
+                alert('Please upload a PDF file only.');
+                e.target.value = '';
+                document.getElementById('resumeFileName').style.display = 'none';
+            } else if (file.size > 10 * 1024 * 1024) {
+                alert('File size should be less than 10MB.');
+                e.target.value = '';
+                document.getElementById('resumeFileName').style.display = 'none';
+            }
+        }
+    });
 }
 
 // Add new experience entry
@@ -192,10 +208,53 @@ function addReference() {
     container.appendChild(newReference);
 }
 
+// Handle resume file upload and generate dummy URL
+async function handleResumeUpload() {
+    const resumeFileInput = document.getElementById('resumeFile');
+    const file = resumeFileInput.files[0];
+
+    if (!file) {
+        return null;
+    }
+
+    // Validate file type
+    if (file.type !== 'application/pdf') {
+        alert('Please upload a PDF file only.');
+        resumeFileInput.value = '';
+        return null;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+        alert('File size should be less than 10MB.');
+        resumeFileInput.value = '';
+        return null;
+    }
+
+    // For now, generate a dummy URL
+    // In the future, this will upload to the backend and return the actual URL
+    const dummyUrl = `https://api.jobautofiller.com/resumes/${Date.now()}_${file.name}`;
+
+    // Show file name
+    const fileNameDisplay = document.getElementById('resumeFileName');
+    fileNameDisplay.textContent = `✓ ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+    fileNameDisplay.style.display = 'block';
+
+    return {
+        url: dummyUrl,
+        fileName: file.name,
+        fileSize: file.size,
+        uploadedAt: new Date().toISOString()
+    };
+}
+
 // Collect form data
-function collectFormData() {
+async function collectFormData() {
     const form = document.getElementById('userInfoForm');
     const formData = new FormData(form);
+
+    // Handle resume upload
+    const resumeInfo = await handleResumeUpload();
 
     // Basic information
     const data = {
@@ -228,7 +287,8 @@ function collectFormData() {
         experience: [],
         references: [],
         documents: {
-            resumeText: formData.get('resumeText'),
+            resumeUrl: resumeInfo ? resumeInfo.url : null,
+            resumeFileName: resumeInfo ? resumeInfo.fileName : null,
             coverLetter: formData.get('coverLetter')
         },
         additional: {
@@ -435,7 +495,12 @@ function populateForm(data) {
 
     // Documents
     if (data.documents) {
-        if (data.documents.resumeText) document.getElementById('resumeText').value = data.documents.resumeText;
+        // Resume file - we can't pre-populate file inputs, but we can show the filename if URL exists
+        if (data.documents.resumeUrl) {
+            const fileNameDisplay = document.getElementById('resumeFileName');
+            fileNameDisplay.textContent = `Previously uploaded: ${data.documents.resumeFileName || 'resume.pdf'}`;
+            fileNameDisplay.style.display = 'block';
+        }
         if (data.documents.coverLetter) document.getElementById('coverLetter').value = data.documents.coverLetter;
     }
 
@@ -447,6 +512,33 @@ function populateForm(data) {
         if (data.additional.languages && data.additional.languages.length > 0) {
             document.getElementById('languages').value = data.additional.languages.join(', ');
         }
+    }
+}
+
+// Save data to backend API
+async function saveToBackend(data) {
+    try {
+        // Backend API URL - update this to match your backend server
+        const API_URL = 'http://localhost:8000/api/save-profile';
+
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('Profile saved to backend:', result);
+        return { success: true, result };
+    } catch (error) {
+        console.error('Error saving to backend:', error);
+        return { success: false, error: error.message };
     }
 }
 
@@ -464,15 +556,26 @@ async function handleFormSubmit(e) {
     submitButton.disabled = true;
     submitButton.innerHTML = '<span>Saving...</span>';
 
-    const data = collectFormData();
-    const success = await saveData(data, false);
+    const data = await collectFormData();
 
-    if (success) {
+    // Save to Chrome storage (local)
+    const localSuccess = await saveData(data, false);
+
+    // Save to backend API
+    const backendResult = await saveToBackend(data);
+
+    if (localSuccess && backendResult.success) {
         document.getElementById('successMessage').classList.remove('hidden');
         submitButton.disabled = false;
         submitButton.innerHTML = '<span>Save & Complete</span><span class="btn-icon">✓</span>';
     } else {
-        alert('Error saving data. Please try again.');
+        // Show warning if backend failed but local save succeeded
+        if (localSuccess && !backendResult.success) {
+            console.warn('Local save succeeded but backend save failed:', backendResult.error);
+            alert('Profile saved locally, but failed to save to server. Please check your connection.');
+        } else {
+            alert('Error saving data. Please try again.');
+        }
         submitButton.disabled = false;
         submitButton.innerHTML = '<span>Save & Complete</span><span class="btn-icon">✓</span>';
     }
@@ -480,7 +583,7 @@ async function handleFormSubmit(e) {
 
 // Save draft
 async function saveDraft() {
-    const data = collectFormData();
+    const data = await collectFormData();
     const success = await saveData(data, true);
 
     if (success) {
